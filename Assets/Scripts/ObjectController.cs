@@ -8,6 +8,10 @@ public class ObjectController : MonoBehaviour
     public Vector3 positionAfterDrag;
 
     public bool onDrag = false;
+
+    public bool intersectWithOtherObject = false;
+
+
     void Start()
     {
 
@@ -19,27 +23,40 @@ public class ObjectController : MonoBehaviour
 
     }
 
-    void onDragEnter()
+    public void onDragEnter()
     {
         onDrag = true;
         positionStartDrag = transform.position;
     }
     // object controller
 
-    void onDragExit()
+    public void onDragExit()
     {
         onDrag = false;
         positionAfterDrag = transform.position;
+
+        if (intersectWithOtherObject)
+        {
+            Debug.Log("Object intersect");
+            transform.position = positionStartDrag;
+        }
     }
 
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.tag != "Untagged")
         {
-            // overlapped with other object
-            Debug.Log("Colliding with game items");
+            intersectWithOtherObject = true;
         }
-
     }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag != "Untagged")
+        {
+            intersectWithOtherObject = false;
+        }
+    }
+
 
 }

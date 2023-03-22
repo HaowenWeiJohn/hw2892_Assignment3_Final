@@ -210,6 +210,7 @@ public class PlaceObjectManager : MonoBehaviour
                     hit.collider.tag == Presets.RockTag ||
                     hit.collider.tag == Presets.TreeTag ||
                     hit.collider.tag == Presets.ReferenceObjectTag ||
+                    hit.collider.tag == Presets.GolfBallTag ||
                     hit.collider.tag == Presets.WallUnitTag
                     )
                 {
@@ -623,15 +624,30 @@ public class PlaceObjectManager : MonoBehaviour
             hits,
             TrackableType.PlaneWithinPolygon))
         {
+
+
+            
             var hit = hits[0].pose;
             if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Began)
             {
                 if (!RotateClockWiseButton.GetComponent<ButtonState>().buttonPressed && !RotateCounterClockWiseButton.GetComponent<ButtonState>().buttonPressed) {
                     manipulatingObject.transform.position = hit.position;
                 }
-
-                
             }
+
+            // check the overlap
+            if(touch.phase == TouchPhase.Began)
+            {
+                manipulatingObject.GetComponent<ObjectController>().onDragEnter();
+            }
+
+            if (touch.phase == TouchPhase.Ended)
+            {
+                manipulatingObject.GetComponent<ObjectController>().onDragExit();
+            }
+
+
+
         }
 
     }

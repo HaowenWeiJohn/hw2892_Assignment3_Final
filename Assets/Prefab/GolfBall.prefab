@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8726010096956726408}
   - component: {fileID: 3116296910381303316}
   - component: {fileID: -3718184073842827232}
-  - component: {fileID: 4635372889594921790}
+  - component: {fileID: -1595005794583224345}
   m_Layer: 0
   m_Name: GolfBall
   m_TagString: GolfBall
@@ -122,7 +122,8 @@ MonoBehaviour:
   positionStartDrag: {x: 0, y: 0, z: 0}
   positionAfterDrag: {x: 0, y: 0, z: 0}
   onDrag: 0
---- !u!54 &4635372889594921790
+  intersectWithOtherObject: 0
+--- !u!54 &-1595005794583224345
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
