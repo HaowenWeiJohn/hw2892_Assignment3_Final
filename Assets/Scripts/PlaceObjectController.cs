@@ -78,6 +78,11 @@ public class PlaceObjectManager : MonoBehaviour
     [SerializeField] private Button UndoButton;
     [SerializeField] private GameObject SaveResetButtons;
 
+    [SerializeField] private GameObject SaveInfoCanvas;
+    [SerializeField] private GameObject SaveSuccessText;
+    [SerializeField] private GameObject SaveFailedText;
+    [SerializeField] private Button ContinueButton;
+
 
 
     private int gameState = Presets.IdleState;
@@ -139,6 +144,11 @@ public class PlaceObjectManager : MonoBehaviour
 
     void Update()
     {
+
+        // set golf, reference, hole to the current scence activate Item
+
+        updateRequiredItems();
+
         //Debug.Log(gameState);
         // only try placing object if one-finger touch
         if (Input.touchCount == 1)
@@ -186,10 +196,38 @@ public class PlaceObjectManager : MonoBehaviour
 
             }
 
+            else if (gameState == Presets.SavingState)
+            {
+
+            }
+
 
         }
     }
 
+    void updateRequiredItems()
+    {
+        hole = null;
+        golfBall = null;
+        referenceObject = null;
+        
+        foreach (GameObject go in placedObjectsList)
+        {
+            
+            if (go.tag == Presets.HoleTag)
+            {
+                hole = go;
+            }
+            if (go.tag == Presets.GolfBallTag)
+            {
+                golfBall = go;
+            }
+            if (go.tag == Presets.ReferenceObjectTag)
+            {
+                referenceObject = go;
+            }
+        }
+    }
 
     void FixedUpdate()
     {
@@ -265,6 +303,8 @@ public class PlaceObjectManager : MonoBehaviour
         SaveResetButtons.SetActive(true);
         ManipulateObjectButtons.SetActive(false);
         ObjectButtons.SetActive(true);
+        ReduUndoButtons.SetActive(true);
+        SaveInfoCanvas.SetActive(false);
     }
 
     void ManipulatingObjectStateGUI()
@@ -272,8 +312,18 @@ public class PlaceObjectManager : MonoBehaviour
         SaveResetButtons.SetActive(false);
         ManipulateObjectButtons.SetActive(true);
         ObjectButtons.SetActive(false);
+        ReduUndoButtons.SetActive(true);
+        SaveInfoCanvas.SetActive(false);
     }
 
+    void SavingStateGUI() {
+        SaveResetButtons.SetActive(false);
+        ManipulateObjectButtons.SetActive(false);
+        ObjectButtons.SetActive(false);
+        ReduUndoButtons.SetActive(false);
+        SaveInfoCanvas.SetActive(true);
+
+    }
 
     //void IdleStateToPlaceingObjectState()
     //{
@@ -316,8 +366,18 @@ public class PlaceObjectManager : MonoBehaviour
         //
         RotateClockWiseButton.onClick.AddListener(RotateClockWiseButtonClicked);
         RotateCounterClockWiseButton.onClick.AddListener(RotateCounterClockWiseButtonClicked);
+
+
+        // CONTINUE Button Clicked
+        ContinueButton.onClick.AddListener(ContinueButtonClicked);
     }
 
+    void ContinueButtonClicked()
+    {
+        IdleStateGUI();
+        setGameState(Presets.IdleState);
+
+    }
 
     void setGameState(int state)
     {
@@ -777,11 +837,17 @@ public class PlaceObjectManager : MonoBehaviour
 
     void saveButtonClicked()
     {
+        SavingStateGUI();
         if (referenceObject !=null && golfBall!=null && hole!=null) {
             positionToText();
+            SaveSuccessText.SetActive(true);
+            SaveFailedText.SetActive(false);
+            
         }
         else{
             Debug.Log("you must have at least one reference object, golf ball, and hole");
+            SaveSuccessText.SetActive(false);
+            SaveFailedText.SetActive(true);
         }
     }
 

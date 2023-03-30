@@ -8,6 +8,7 @@ public static class Presets
     public static int IdleState = 0;
     public static int PlacingObjectState = 1;
     public static int ManipulateObjectState = 2;
+    public static int SavingState = 3;
 
     public static int NoButtonSelected = 0;
     public static int WallUnitObjectButtonSelected = 1;
