@@ -74,6 +74,8 @@ public class PlaceObjectManager : MonoBehaviour
     [SerializeField] private GameObject ObjectButtons;
     [SerializeField] private GameObject ManipulateObjectButtons;
     [SerializeField] private GameObject ReduUndoButtons;
+    [SerializeField] private Button RedoButton;
+    [SerializeField] private Button UndoButton;
     [SerializeField] private GameObject SaveResetButtons;
 
 
@@ -113,6 +115,13 @@ public class PlaceObjectManager : MonoBehaviour
     //////////////////// manipulate object
     ///
 
+
+    // action list place
+
+    List<List<GameObject>> actionList = new List<List<GameObject>>();
+    List<List<GameObject>> stackActionList = new List<List<GameObject>>();
+    
+
     private GameObject golfBall = null;
     private GameObject hole = null;
     private GameObject referenceObject = null;
@@ -121,6 +130,7 @@ public class PlaceObjectManager : MonoBehaviour
     //public TextAsset save;
     void Start()
     {
+        saveAction(); // save a start scence
         raycastManager = GetComponent<ARRaycastManager>();
         connectButtonFunctions();
         IdleStateGUI();
@@ -187,11 +197,31 @@ public class PlaceObjectManager : MonoBehaviour
         if (RotateClockWiseButton.GetComponent<ButtonState>().buttonPressed)
         {
             manipulatingObject.transform.RotateAround(manipulatingObject.transform.position, Vector3.up, Presets.ManipulateObjectRotationSpeed * Time.deltaTime);
+            
         }
         else if (RotateCounterClockWiseButton.GetComponent<ButtonState>().buttonPressed) {
             manipulatingObject.transform.RotateAround(manipulatingObject.transform.position, Vector3.up, -Presets.ManipulateObjectRotationSpeed * Time.deltaTime);
         }
     }
+
+    void RotateClockWiseButtonClicked()
+    {
+        Debug.Log("save rotation");
+        //placedObjectsList.Remove(manipulatingObject);
+        //placedObjectsList.Add(manipulatingObject);
+        saveAction();
+    }
+
+    void RotateCounterClockWiseButtonClicked()
+    {
+        Debug.Log("save rotation");
+        //placedObjectsList.Remove(manipulatingObject);
+        //placedObjectsList.Add(manipulatingObject);
+        saveAction();
+    }
+
+
+
 
     void selectObject()
     {
@@ -272,6 +302,8 @@ public class PlaceObjectManager : MonoBehaviour
         GolfBallObjectButton.onClick.AddListener(GolfBallObjectButtonClicked);
         HoleObjectButton.onClick.AddListener(HoleObjectButtonClicked);
         ReferenceObjectButton.onClick.AddListener(ReferenceObjectButtonClicked);
+        RedoButton.onClick.AddListener(redoButtonClicked);
+        UndoButton.onClick.AddListener(undoButtonClicked);
 
         // manipulation state
         SaveManipulationButton.onClick.AddListener(SaveManipulationButtonClicked);
@@ -280,6 +312,10 @@ public class PlaceObjectManager : MonoBehaviour
         // save reset
         ResetButton.onClick.AddListener(ResetButtonClicked);
         SaveButton.onClick.AddListener(saveButtonClicked);
+
+        //
+        RotateClockWiseButton.onClick.AddListener(RotateClockWiseButtonClicked);
+        RotateCounterClockWiseButton.onClick.AddListener(RotateCounterClockWiseButtonClicked);
     }
 
 
@@ -466,28 +502,72 @@ public class PlaceObjectManager : MonoBehaviour
         setGameState(Presets.IdleState);
 
     }
-
+    
     void RemoveObjectButtonClicked()
     {
         placedObjectsList.Remove(manipulatingObject);
         Destroy(manipulatingObject);
         manipulatingObject = null;
+        
         IdleStateGUI();
         setGameState(Presets.IdleState);
+
+        saveAction();
     }
-
-
+    
+    
 
     void ResetButtonClicked()
     {
-        foreach (GameObject placedObject in placedObjectsList){
-            Destroy(placedObject);
+        //foreach (GameObject placedObject in placedObjectsList){
+        //    placedObjectsList.Remove(placedObject);
+        //    Destroy(placedObject);
+        //}
+        if (placedObjectsList.Count > 0)
+        {
+            for (int i = 0; i < placedObjectsList.Count; i++)
+            {
+                Destroy(placedObjectsList[i].gameObject);
+            }
+
+            placedObjectsList = new List<GameObject>();
+            setGameState(Presets.IdleState);
+            IdleStateGUI();
+
+            saveAction();
         }
-        placedObjectsList = new List<GameObject>();
-        setGameState(Presets.IdleState);
-        IdleStateGUI();
+        else {
+            Debug.Log("Nothing to reset");
+        }
     }
 
+    void setPlacedObjectListUndo()
+    {
+        for (int i = 0; i < placedObjectsList.Count; i++)
+        {
+            Destroy(placedObjectsList[i].gameObject);
+        }
+
+        placedObjectsList = new List<GameObject>();
+        foreach(GameObject item in actionList[actionList.Count - 1]) {
+            placedObjectsList.Add(Instantiate(item));
+        }
+
+    }
+
+    void setPlacedObjectListRedo()
+    {
+        for (int i = 0; i < placedObjectsList.Count; i++)
+        {
+            Destroy(placedObjectsList[i].gameObject);
+        }
+
+        placedObjectsList = new List<GameObject>();
+        foreach (GameObject item in actionList[actionList.Count - 1])
+        {
+            placedObjectsList.Add(Instantiate(item));
+        }
+    }
 
 
 
@@ -573,6 +653,8 @@ public class PlaceObjectManager : MonoBehaviour
                 {
                     hole.transform.position = hit.position;
                 }
+
+                saveAction();
             }
 
             else if (currentSelectedObject.tag == Presets.GolfBallTag)
@@ -586,6 +668,7 @@ public class PlaceObjectManager : MonoBehaviour
                 {
                     golfBall.transform.position = hit.position;
                 }
+                saveAction();
             }
 
             else if (currentSelectedObject.tag == Presets.ReferenceObjectTag)
@@ -599,6 +682,38 @@ public class PlaceObjectManager : MonoBehaviour
                 {
                     referenceObject.transform.position = hit.position;
                 }
+                saveAction();
+            }
+
+            else if (currentSelectedObject.tag == Presets.WallUnitTag)
+            {
+                //Touch touch = Input.GetTouch(0);
+                //Ray ray = Camera.main.ScreenPointToRay(touch.position);
+
+                RaycastHit hits;
+
+                bool stackWall = false;
+                if (Physics.Raycast(ray, out hits))
+                {
+                    Debug.Log(hits.collider.tag);
+                    if (hits.collider.tag == Presets.WallUnitTag)
+                    {
+                        stackWall = true;
+                    }
+                }
+
+                if (stackWall)
+                {
+                    Vector3 wallPosition = hits.collider.transform.position + hits.collider.transform.up * 0.2f;
+                    GameObject placedObject = Instantiate(currentSelectedObject, wallPosition, Quaternion.identity);
+                    placedObjectsList.Add(placedObject);
+                }
+                else
+                {
+                    GameObject placedObject = Instantiate(currentSelectedObject, hit.position, Quaternion.identity);
+                    placedObjectsList.Add(placedObject);
+                }
+                saveAction();
             }
 
             else
@@ -606,6 +721,7 @@ public class PlaceObjectManager : MonoBehaviour
 
                 GameObject placedObject = Instantiate(currentSelectedObject, hit.position, Quaternion.identity);
                 placedObjectsList.Add(placedObject);
+                saveAction();
             }
 
         }
@@ -644,6 +760,13 @@ public class PlaceObjectManager : MonoBehaviour
             if (touch.phase == TouchPhase.Ended)
             {
                 manipulatingObject.GetComponent<ObjectController>().onDragExit();
+                
+                // if not overlapped we save this action
+                
+                if (manipulatingObject.GetComponent<ObjectController>().intersectWithOtherObject==false)
+                {
+                    saveAction(); //???
+                }
             }
 
 
@@ -682,6 +805,101 @@ public class PlaceObjectManager : MonoBehaviour
                 // save reference object
                 Debug.Log("Reference Object does not need to be saved");
             }
+        }
+    }
+
+
+    void undoButtonClicked()
+    {
+        // deactivate all current objects
+
+
+        Debug.Log("Redo");
+        manipulatingObject = null;
+        IdleStateGUI();
+        setGameState(Presets.IdleState);
+
+        if (actionList.Count <= 1)
+        {
+            Debug.Log("Nothing to Undo");
+        }
+        else
+        {
+            deactivatePlacedObjectList();
+            // equal to -1
+            stackActionList.Add(actionList[actionList.Count-1]);
+            actionList.RemoveAt(actionList.Count - 1);
+            // action list equal to -1
+            //placedObjectsList = actionList[actionList.Count - 1];
+            // we should copy this list
+            setPlacedObjectListUndo();
+            // clone and copy the placed object list
+            
+
+
+
+
+            activatePlacedObjectList();
+        }
+    }
+
+    void redoButtonClicked()
+    {
+        manipulatingObject = null;
+        IdleStateGUI();
+        setGameState(Presets.IdleState);
+
+        Debug.Log("Redo");
+        if (stackActionList.Count==0)
+        {
+            Debug.Log("Nothing to Undo");
+        }
+        else
+        {
+            deactivatePlacedObjectList();
+            actionList.Add(stackActionList[stackActionList.Count-1]);
+            stackActionList.RemoveAt(stackActionList.Count - 1);
+            // action list equal to -1
+            //placedObjectsList = actionList[actionList.Count - 1];
+            setPlacedObjectListRedo();
+            activatePlacedObjectList();
+        }
+        
+
+    }
+
+
+    void saveAction()
+    {
+        Debug.Log("Save Action");
+
+        List<GameObject> currentAction = new List<GameObject>();
+        foreach(GameObject go in placedObjectsList)
+        {
+            GameObject saveActionGo = Instantiate(go);
+            currentAction.Add(saveActionGo);
+        }
+
+        foreach (GameObject item in currentAction)
+        {
+            item.SetActive(false);
+        }
+        actionList.Add(currentAction);
+    }
+
+    void deactivatePlacedObjectList()
+    {
+        foreach (GameObject item in placedObjectsList)
+        {
+            item.SetActive(false);
+        }
+    }
+
+    void activatePlacedObjectList()
+    {
+        foreach (GameObject item in placedObjectsList)
+        {
+            item.SetActive(true);
         }
     }
 
