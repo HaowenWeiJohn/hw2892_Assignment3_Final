@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44402242, g: 0.49316543, b: 0.5722324, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -495,7 +495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 0.7
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
@@ -1275,6 +1275,7 @@ GameObject:
   - component: {fileID: 388525034}
   - component: {fileID: 388525033}
   - component: {fileID: 388525035}
+  - component: {fileID: 388525036}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -1369,6 +1370,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AnchorPrefab: {fileID: 0}
+--- !u!114 &388525036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388525029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 068c45e32a0b27a4db6e5b88f44fd441, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Apple: {fileID: 4732331525718034501, guid: d4b4e4687b3107942b0ace50ce353298, type: 3}
+  Tree: {fileID: 192044, guid: 31a09dff08da9004db1adb7237e93028, type: 3}
+  GolfBall: {fileID: 7549347909357575578, guid: a8e56eb3d2dc2e246b9552854410e024,
+    type: 3}
+  Hole: {fileID: 7438982644635937159, guid: 4b050d7181c2a934e87d47bb340ad763, type: 3}
+  Rock: {fileID: 1939346362152576669, guid: b8ee24dd41477c14b90654857194093a, type: 3}
+  WallUnit: {fileID: 6881753791674959482, guid: e140093a1c0fe124b8fdccd623971d6d,
+    type: 3}
+  ReferenceObject: {fileID: 1502522836021690664, guid: 8c93e71223e8fe2449a06d565af6850b,
+    type: 3}
+  WallUnitObjectButton: {fileID: 725889744}
+  TreeObjectButton: {fileID: 576285798}
+  AppleObjectButton: {fileID: 1560369309}
+  RockObjectButton: {fileID: 2042835065}
+  GolfBallObjectButton: {fileID: 1874254009}
+  HoleObjectButton: {fileID: 1134458859}
+  ReferenceObjectButton: {fileID: 1412434100}
+  RotateClockWiseButton: {fileID: 162374697}
+  RotateCounterClockWiseButton: {fileID: 532617820}
+  SaveManipulationButton: {fileID: 614951646}
+  RemoveObjectButton: {fileID: 973614988}
+  SaveButton: {fileID: 1285071968}
+  ResetButton: {fileID: 1947813202}
+  ObjectButtons: {fileID: 1137868304}
+  ManipulateObjectButtons: {fileID: 2115565554}
+  ReduUndoButtons: {fileID: 1231212048}
+  RedoButton: {fileID: 1311222715}
+  UndoButton: {fileID: 1312519936}
+  SaveResetButtons: {fileID: 588141444}
+  SaveInfoCanvas: {fileID: 392170278}
+  SaveSuccessText: {fileID: 1009850141}
+  SaveFailedText: {fileID: 1202885267}
+  ContinueButton: {fileID: 122939470}
+  placedObjectsList: []
+  manipulatingObject: {fileID: 0}
 --- !u!1 &392170278
 GameObject:
   m_ObjectHideFlags: 0
@@ -4519,7 +4567,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1412085799
 MonoBehaviour:
   m_ObjectHideFlags: 0
